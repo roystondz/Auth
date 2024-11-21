@@ -54,7 +54,7 @@ app.post("/login",async (req,res)=>{
         if(result){
             let token = jwt.sign({email:email,userid:existingUser._id},"Secret")
             res.cookie("token",token)
-            res.status(200).send("Logged In")
+            res.status(200).redirect("/profile")
         }
         else{
             res.status(500).send("Invalid password")
@@ -64,11 +64,29 @@ app.post("/login",async (req,res)=>{
 
 app.get("/logout",function(req,res){
     res.cookie("token","")
-    res.redirect("/")
+    res.redirect("/login")
+})
+
+app.get("/profile",isLoggedIn,async (req,res)=>{
+    //populate the user with the created posts
+    let user = await userModel.findOne({email:req.user.email}).populate("post");
+    
+    res.render("profile",{user:user})
+})
+
+app.post("/post",isLoggedIn,async (req,res)=>{
+    let user = await userModel.findOne({email:req.user.email})
+    let post = await postModel.create({
+        user:user._id,
+        content:req.body.content
+    })
+    user.post.push(post._id)
+    await user.save()
+    res.redirect("/profile")
 })
 
 function isLoggedIn(req,res,next){
-    if(req.cookies.token === "") res.send("You must be logged in");
+    if(req.cookies.token === "") res.redirect("/login");
     else{
         let data = jwt.verify(req.cookies.token,"Secret")
         req.user = data;
