@@ -26,7 +26,7 @@ Before running the project, make sure you have the following installed on your s
 
 1. **Clone the repository**  
    ```bash  
-   git clone https://github.com/royston/Blog.git  
+   git clone https://github.com/roystondz/Blog.git  
    cd Blog
 2. **Install**
    ```bash
